@@ -1,0 +1,35 @@
+---
+title: To Do List
+layout: ./app/login_layout.ejs
+engine: ejs
+current: signup.html
+---
+
+
+<h2 class="fw-bold fs-3 mb-6 mb-lg-5 text-center text-md-start">註冊帳號</h2>
+<form>
+    <div class="mb-3">
+        <label for="signupEmail" class="form-label mb-1 fw-bold">Email</label>
+        <input type="email" class="form-control mb-1" id="signupEmail" aria-describedby="your name"
+            placeholder="請輸入Email">
+    </div>
+    <div class="mb-3">
+        <label for="name" class="form-label mb-1 fw-bold">您的暱稱</label>
+        <input type="text" class="form-control mb-1" id="name" aria-describedby="your name" placeholder="請輸入您的暱稱">
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label mb-1 fw-bold">密碼</label>
+        <input type="password" class="form-control mb-1" id="password" aria-describedby="your password" placeholder="請輸入密碼">
+    </div>
+    <div class="mb-5">
+        <label for="passwordDoubleCheck" class="form-label mb-1 fw-bold">再次輸入密碼</label>
+        <input type="password" class="form-control" id="passwordDoubleCheck" placeholder="請再次輸入密碼">
+    </div>
+    <div class="text-center">
+        <a type="submit" class="btn btn-secondary mb-5">註冊帳號</a>
+        <a href="index.html" class="text-secondary fw-bold">登入</a>
+    </div>
+</form>
+
+
+

@@ -1,0 +1,42 @@
+---
+title: To Do List
+layout: ./app/list_layout.ejs
+engine: ejs
+current: list.html
+---
+
+<main class="container p-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-6 p-0">
+            <div class="mb-3 input-block d-flex justify-content-between align-items-center">
+                <input type="text" aria-describedby="text-input" placeholder="新增待辦事項" class="input-text">
+                <a href="#"
+                    class="btn btn-secondary btn-sm m-1 fs-2 fw-bold d-flex align-items-center justify-content-center enter-btn">+</a>
+            </div>
+            <div class="none-list">
+                <div class="mt-md-6 d-flex flex-column align-items-center">
+                    <h2 class="text-center fs-4 mb-3">目前尚無待辦事項</h2>
+                    <img src="assets/images/empty 1.png" alt="picture" width="240">
+                </div>
+            </div>
+            <section class="list-block d-none">
+                <div class="bg-white pb-6 list-shadow">
+                    <ul class="row text-center mb-0 mx-0 tab">
+                        <li class="col py-3 tabs-active" data-status="all">全部</li>
+                        <li class="col py-3" data-status="undo">待完成</li>
+                        <li class="col py-3" data-status="done">已完成</li>
+                    </ul>
+                    <ul class="px-5 list">
+                    </ul>
+                    <div class="px-5 d-flex justify-content-between">
+                        <span class="undo-num">0 個待完成項目</span>
+                        <a href="#" class="clear-all text-light">清除已完成項目</a>
+                    </div>
+                </div>
+               
+            </section>
+        </div>
+    </div>
+</main>
+
+
