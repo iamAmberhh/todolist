@@ -15,18 +15,18 @@ function getTodo() {
       },
     })
     .then((res) => {
+      // data.push(res.data.todos)
       data = res.data.todos;
       updateList();
     })
     .catch((err) => alert(err.response));
 }
 
-if(window.location.pathname == "/list.html"){
+if (window.location.pathname == "/list.html") {
   getTodo();
 }
 
 //渲染畫面
-
 function renderData(arr) {
   let str = "";
   arr.forEach((item) => {
@@ -71,16 +71,18 @@ function addToDo() {
     )
     .then((res) => {
       getTodo();
+      let obj = {};
+      obj.content = inputText.value;
+      obj.check = "";
+      data.unshift(obj);
+      inputText.value = "";
+      updateList();
     })
     .catch((err) => console.log(err.response));
 
-  let obj = {};
-  obj.content = inputText.value;
-  obj.check = "";
-  data.unshift(obj);
-  inputText.value = "";
-  updateList();
+ 
 }
+
 //按鈕輸入
 if (inputBlock) {
   inputBlock.addEventListener("keyup", function (e) {
@@ -90,11 +92,11 @@ if (inputBlock) {
   });
 }
 
-
-// 刪除代辦
+// 刪除&完成代辦
 if (list) {
   list.addEventListener("click", function (e) {
     let listId = e.target.closest("li").dataset.id;
+    let checkBtn = e.target.closest("input");
     if (e.target.nodeName === "IMG") {
       e.preventDefault();
 
@@ -113,7 +115,6 @@ if (list) {
       data.splice(index, 1);
     } else {
       data.forEach((i) => {
-        let finish = "";
         if (i.id === listId) {
           axios
             .patch(
@@ -127,22 +128,33 @@ if (list) {
             )
             .then((res) => {
               console.log(res.data);
+              // check(res.data);
+              if (res.data.completed_at == null) {
+                checkBtn.removeAttribute('checked',"");
+                // console.log(1)
+                console.log(checkBtn)
+              } else {
+                checkBtn.setAttribute('checked',"");
+                // console.log(2)
+                console.log(checkBtn)
+              }
+              updateList();
             })
-            .catch((err) => console.log(err.response));
+            .catch((err) => console.log(err));
         }
       });
     }
-    updateList();
+
   });
 }
 
-function check(obj) {
-  if (obj.check == "") {
-    obj.check = "checked";
-  } else {
-    obj.check = "";
-  }
-}
+// function check(obj) {
+//   if (obj.completed_at == null) {
+//     obj.check = "";
+//   } else {
+//     obj.check = "checked";
+//   }
+// }
 
 // 切換畫面
 
@@ -164,15 +176,16 @@ let undoNum = document.querySelector(".undo-num");
 
 function updateList() {
   let showData = [];
+
   if (tabStatus === "all") {
     showData = data;
-  } else if (tabStatus === "undo") {
-    showData = data.filter((i) => i.check === "");
+   }else if (tabStatus === "undo") {
+    showData = data.filter((i) => i.completed_at === null);
   } else if (tabStatus === "done") {
-    showData = data.filter((i) => i.check === "checked");
+    showData = data.filter((i) => i.completed_at !== null);
   }
 
-  let todoLength = data.filter((i) => i.check === "");
+  let todoLength = data.filter((i) => i.completed_at === null);
   let str = `${todoLength.length} 個待完成項目`;
   undoNum.innerHTML = str;
 
@@ -184,7 +197,7 @@ const clearAll = document.querySelector(".clear-all");
 if (clearAll) {
   clearAll.addEventListener("click", function (e) {
     e.preventDefault();
-    data = data.filter((i) => i.check === "");
+    data = data.filter((i) => i.completed_at === null);
     updateList();
   });
 }
