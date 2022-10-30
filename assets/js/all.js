@@ -6,14 +6,31 @@ var inputBlock = document.querySelector(".input-block");
 var inputText = document.querySelector(".input-text");
 var enterBtn = document.querySelector(".enter-btn");
 var nonList = document.querySelector(".none-list");
-var listBlock = document.querySelector(".list-block"); //渲染畫面
-
+var listBlock = document.querySelector(".list-block");
 var data = [];
+
+function getTodo() {
+  axios.get("https://todoo.5xcamp.us/todos", {
+    headers: {
+      Authorization: localStorage.getItem("token")
+    }
+  }).then(function (res) {
+    data = res.data.todos;
+    updateList();
+  })["catch"](function (err) {
+    return alert(err.response);
+  });
+}
+
+if (window.location.pathname == "/list.html") {
+  getTodo();
+} //渲染畫面
+
 
 function renderData(arr) {
   var str = "";
   arr.forEach(function (item) {
-    str += "<li class=\"d-flex border-bottom py-3\" data-num=\"".concat(item.num, "\">\n    <label class=\"me-auto checkbox\">\n    <input class=\"form-check-input me-3\" type=\"checkbox\" ").concat(item.check, ">\n    <span>").concat(item.content, "</span>\n    </label>\n    <a href=\"#\" class=\"delete\"><img src=\"assets/images/delete.jpg\" alt=\"delete\" class=\"img-fluid delete\"></a>\n</li>");
+    str += "<li class=\"d-flex border-bottom py-3\" data-id=\"".concat(item.id, "\">\n    <label class=\"me-auto checkbox\">\n    <input class=\"form-check-input me-3\" type=\"checkbox\">\n    <span>").concat(item.content, "</span>\n    </label>\n    <a href=\"#\" class=\"delete\"><img src=\"assets/images/delete.jpg\" alt=\"delete\" class=\"img-fluid delete\"></a>\n</li>");
   });
   nonList.setAttribute("class", "d-none");
   listBlock.setAttribute("class", "d-block");
@@ -22,7 +39,9 @@ function renderData(arr) {
 } //新增代辦
 
 
-enterBtn.addEventListener("click", addToDo);
+if (enterBtn) {
+  enterBtn.addEventListener("click", addToDo);
+}
 
 function addToDo() {
   if (inputText.value === "") {
@@ -30,57 +49,102 @@ function addToDo() {
     return;
   }
 
+  axios.post("https://todoo.5xcamp.us/todos", {
+    todo: {
+      content: inputText.value
+    }
+  }, {
+    headers: {
+      Authorization: localStorage.getItem("token")
+    }
+  }).then(function (res) {
+    getTodo();
+  })["catch"](function (err) {
+    return console.log(err.response);
+  });
   var obj = {};
   obj.content = inputText.value;
   obj.check = "";
-  obj.num = new Date().getTime();
-  data.push(obj);
+  data.unshift(obj);
   inputText.value = "";
   updateList();
 } //按鈕輸入
 
 
-inputBlock.addEventListener("keyup", function (e) {
-  if (e.key === "Enter") {
-    addToDo();
-  }
-}); // 刪除代辦
+if (inputBlock) {
+  inputBlock.addEventListener("keyup", function (e) {
+    if (e.key === "Enter") {
+      addToDo();
+    }
+  });
+} // 刪除代辦
 
-list.addEventListener("click", function (e) {
-  var ID = parseInt(e.target.closest("li").dataset.num);
 
-  if (e.target.nodeName === "IMG") {
-    e.preventDefault();
-    var index = data.findIndex(function (item) {
-      return item.num === ID;
-    });
-    data.splice(index, 1);
-  } else if (e.target.nodeName === "INPUT") {
-    data.forEach(function (i) {
-      if (i.num === ID) {
-        if (i.check === "") {
-          i.check = "checked";
-        } else {
-          i.check = "";
+if (list) {
+  list.addEventListener("click", function (e) {
+    var listId = e.target.closest("li").dataset.id;
+
+    if (e.target.nodeName === "IMG") {
+      e.preventDefault();
+      axios["delete"]("https://todoo.5xcamp.us/todos/".concat(listId), {
+        headers: {
+          Authorization: localStorage.getItem("token")
         }
-      }
-    });
-  }
+      }).then(function (res) {
+        alert(res.data.message);
+      })["catch"](function (err) {
+        return console.log(err.response);
+      });
+      var index = data.findIndex(function (item) {
+        return item.id === listId;
+      });
+      data.splice(index, 1);
+    } else {
+      data.forEach(function (i) {
+        var finish = "";
 
-  updateList();
-}); // 切換畫面
+        if (i.id === listId) {
+          axios.patch("https://todoo.5xcamp.us/todos/".concat(listId, "/toggle"), {}, {
+            headers: {
+              Authorization: localStorage.getItem("token")
+            }
+          }).then(function (res) {
+            console.log(res.data);
+          })["catch"](function (err) {
+            return console.log(err.response);
+          });
+        }
+      });
+    }
+
+    updateList();
+  });
+}
+
+function check(obj) {
+  if (obj.check == "") {
+    obj.check = "checked";
+  } else {
+    obj.check = "";
+  }
+} // 切換畫面
+
 
 var tab = document.querySelector(".tab");
 var tabStatus = "all";
-tab.addEventListener("click", function (e) {
-  tabStatus = e.target.dataset.status;
-  var tabs = document.querySelectorAll(".tab li");
-  tabs.forEach(function (i) {
-    i.classList.remove("tabs-active");
+
+if (tab) {
+  tab.addEventListener("click", function (e) {
+    tabStatus = e.target.dataset.status;
+    var tabs = document.querySelectorAll(".tab li");
+    tabs.forEach(function (i) {
+      i.classList.remove("tabs-active");
+    });
+    e.target.classList.add("tabs-active");
+    updateList();
   });
-  e.target.classList.add("tabs-active");
-  updateList();
-});
+}
+
 var undoNum = document.querySelector(".undo-num");
 
 function updateList() {
@@ -108,13 +172,16 @@ function updateList() {
 
 
 var clearAll = document.querySelector(".clear-all");
-clearAll.addEventListener("click", function (e) {
-  e.preventDefault();
-  data = data.filter(function (i) {
-    return i.check === "";
+
+if (clearAll) {
+  clearAll.addEventListener("click", function (e) {
+    e.preventDefault();
+    data = data.filter(function (i) {
+      return i.check === "";
+    });
+    updateList();
   });
-  updateList();
-});
+}
 
 function removeAll() {
   if (data.length === 0) {
@@ -124,8 +191,71 @@ function removeAll() {
 }
 "use strict";
 
-var accountInput = document.getElementById("signupEmail"); // const nickname = document.querySelector('')
+var loginAccount = document.getElementById("accountEmail");
+var loginPwd = document.getElementById("login-password");
+var loginBtn = document.querySelector(".login");
+var token = "";
 
-console.log(accountInput);
-console.log(123);
+if (loginBtn) {
+  loginBtn.addEventListener("click", function (e) {
+    if (loginAccount.value.trim() == "" || loginPwd.value.trim() == "") {
+      alert("\u5E33\u865F\u5BC6\u78BC\u4E0D\u53EF\u7A7A\u767D");
+      return;
+    }
+
+    var obj = {};
+    obj.email = loginAccount.value;
+    obj.password = loginPwd.value;
+    axios.post("https://todoo.5xcamp.us/users/sign_in", {
+      user: obj
+    }).then(function (res) {
+      alert(res.data.message);
+      token = res.headers.authorization;
+      localStorage.setItem('token', token);
+      window.location.assign("list.html");
+    })["catch"](function (err) {
+      alert(err.response.data.message);
+    });
+  });
+}
+"use strict";
+
+var accountInput = document.getElementById("signupEmail");
+var nickname = document.getElementById("name");
+var pwd = document.getElementById("password");
+var pwdDoubleCheck = document.getElementById("passwordDoubleCheck");
+var signUpBtn = document.querySelector(".sign-up");
+
+if (signUpBtn) {
+  signUpBtn.addEventListener("click", function (e) {
+    if (accountInput.value.trim() == "" || pwd.value.trim() == "" || pwdDoubleCheck.value.trim() == "") {
+      alert("\u5E33\u865F\u5BC6\u78BC\u4E0D\u53EF\u7A7A\u767D");
+      return;
+    }
+
+    if (pwd.value.length < 6) {
+      alert("\u5BC6\u78BC\u9808\u8D85\u904E6\u500B\u5B57\u5143");
+      return;
+    }
+
+    if (pwd.value !== pwdDoubleCheck.value) {
+      alert("\u5BC6\u78BC\u4E0D\u76F8\u7B26\uFF0C\u8ACB\u518D\u6B21\u78BA\u8A8D");
+      return;
+    }
+
+    var obj = {};
+    obj.email = accountInput.value;
+    obj.nickname = nickname.value;
+    obj.password = pwd.value;
+    console.log(obj);
+    axios.post("https://todoo.5xcamp.us/users", {
+      user: obj
+    }).then(function (res) {
+      alert(res.data.message);
+      window.location.assign("index.html");
+    })["catch"](function (err) {
+      alert(err.response.data.error);
+    });
+  });
+}
 //# sourceMappingURL=all.js.map

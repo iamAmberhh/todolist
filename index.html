@@ -28,16 +28,16 @@
 <h2 class="fw-bold fs-lg-3 fs-4 mb-6 mb-lg-5 text-center text-md-start">最實用的線上代辦事項服務</h2>
 <form>
     <div class="mb-3">
-      <label for="exampleInputEmail1" class="form-label mb-1 fw-bold">Email</label>
-      <input type="email" class="form-control mb-1" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="請輸入Email">
+      <label for="accountEmail" class="form-label mb-1 fw-bold">Email</label>
+      <input type="email" class="form-control mb-1" id="accountEmail" aria-describedby="emailHelp" placeholder="請輸入Email">
       <div id="emailHelp" class="form-text text-danger fs-5">此欄位不可為空</div>
     </div>
     <div class="mb-5">
-      <label for="exampleInputPassword1" class="form-label mb-1 fw-bold">密碼</label>
-      <input type="password" class="form-control" id="exampleInputPassword1" placeholder="請輸入密碼">
+      <label for="login-password" class="form-label mb-1 fw-bold">密碼</label>
+      <input type="password" class="form-control" id="login-password" placeholder="請輸入密碼">
     </div>
     <div class="text-center">
-        <a href="list.html"  type="submit" class="btn btn-secondary mb-5">登入</a>
+        <a type="submit" class="btn btn-secondary mb-5 login">登入</a>
         <a href="signup.html" class="text-secondary fw-bold">註冊帳號</a>
     </div>
   </form>
@@ -47,6 +47,7 @@
 
   
   <script src="./assets/js/vendors.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
   <script src="./assets/js/all.js"></script>
 
   </body>
