@@ -15,6 +15,7 @@ function getTodo() {
       Authorization: localStorage.getItem("token")
     }
   }).then(function (res) {
+    // data.push(res.data.todos)
     data = res.data.todos;
     updateList();
   })["catch"](function (err) {
@@ -59,15 +60,15 @@ function addToDo() {
     }
   }).then(function (res) {
     getTodo();
+    var obj = {};
+    obj.content = inputText.value;
+    obj.check = "";
+    data.unshift(obj);
+    inputText.value = "";
+    updateList();
   })["catch"](function (err) {
     return console.log(err.response);
   });
-  var obj = {};
-  obj.content = inputText.value;
-  obj.check = "";
-  data.unshift(obj);
-  inputText.value = "";
-  updateList();
 } //按鈕輸入
 
 
@@ -77,12 +78,13 @@ if (inputBlock) {
       addToDo();
     }
   });
-} // 刪除代辦
+} // 刪除&完成代辦
 
 
 if (list) {
   list.addEventListener("click", function (e) {
     var listId = e.target.closest("li").dataset.id;
+    var checkBtn = e.target.closest("input");
 
     if (e.target.nodeName === "IMG") {
       e.preventDefault();
@@ -101,33 +103,40 @@ if (list) {
       data.splice(index, 1);
     } else {
       data.forEach(function (i) {
-        var finish = "";
-
         if (i.id === listId) {
           axios.patch("https://todoo.5xcamp.us/todos/".concat(listId, "/toggle"), {}, {
             headers: {
               Authorization: localStorage.getItem("token")
             }
           }).then(function (res) {
-            console.log(res.data);
+            console.log(res.data); // check(res.data);
+
+            if (res.data.completed_at == null) {
+              checkBtn.removeAttribute('checked', ""); // console.log(1)
+
+              console.log(checkBtn);
+            } else {
+              checkBtn.setAttribute('checked', ""); // console.log(2)
+
+              console.log(checkBtn);
+            }
+
+            updateList();
           })["catch"](function (err) {
-            return console.log(err.response);
+            return console.log(err);
           });
         }
       });
     }
-
-    updateList();
   });
-}
-
-function check(obj) {
-  if (obj.check == "") {
-    obj.check = "checked";
-  } else {
-    obj.check = "";
-  }
-} // 切換畫面
+} // function check(obj) {
+//   if (obj.completed_at == null) {
+//     obj.check = "";
+//   } else {
+//     obj.check = "checked";
+//   }
+// }
+// 切換畫面
 
 
 var tab = document.querySelector(".tab");
@@ -154,16 +163,16 @@ function updateList() {
     showData = data;
   } else if (tabStatus === "undo") {
     showData = data.filter(function (i) {
-      return i.check === "";
+      return i.completed_at === null;
     });
   } else if (tabStatus === "done") {
     showData = data.filter(function (i) {
-      return i.check === "checked";
+      return i.completed_at !== null;
     });
   }
 
   var todoLength = data.filter(function (i) {
-    return i.check === "";
+    return i.completed_at === null;
   });
   var str = "".concat(todoLength.length, " \u500B\u5F85\u5B8C\u6210\u9805\u76EE");
   undoNum.innerHTML = str;
@@ -177,7 +186,7 @@ if (clearAll) {
   clearAll.addEventListener("click", function (e) {
     e.preventDefault();
     data = data.filter(function (i) {
-      return i.check === "";
+      return i.completed_at === null;
     });
     updateList();
   });
